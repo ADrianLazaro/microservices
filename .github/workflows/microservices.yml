@@ -1,0 +1,54 @@
+name: User Registration Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      username:
+        description: 'Username del usuario'
+        required: true
+        type: string
+      email:
+        description: 'Email del usuario'
+        required: true
+        type: string
+      password:
+        description: 'Contraseña del usuario'
+        required: true
+        type: string
+
+jobs:
+    register-user:
+        runs-on: ubuntu-latest
+    
+        steps:
+          - name: Checkout code
+            id: register
+            uses: fjogeleit/http-request-action@v1
+            with:
+              url: 'http://localhost:3000/api/v1/register'
+              method: 'POST'
+              data: |
+                {
+                 "username": "${{ github.event.inputs.username }}",
+                 "email": "${{ github.event.inputs.email }}",
+                 "password": "${{ github.event.inputs.password }}"
+                }
+              customHeaders: 'Content-Type: application/json'
+            continue-on-error: true
+          
+          - name: Verificar registro
+            if: steps.register.outcome != 'success'
+            run: |
+              echo "Error en el registro de usuario"
+              echo "response: ${{ steps.register.outputs.response }}"
+              exit 1
+          
+          - name: Registro exitoso
+            if: steps.register.outcome == 'success'
+            run: |
+              echo "Usuario registrado exitosamente"
+              echo "response: ${{ steps.register.outputs.response }}"
+        
+
+        
+        
