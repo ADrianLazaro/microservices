@@ -33,7 +33,7 @@ jobs:
                  "email": "${{ github.event.inputs.email }}",
                  "password": "${{ github.event.inputs.password }}"
                 }
-              customHeaders: 'Content-Type: application/json'
+              customHeaders: '{"Content-Type: application/json"}'
             continue-on-error: true
           
           - name: Verificar registro
