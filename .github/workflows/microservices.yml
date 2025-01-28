@@ -22,19 +22,26 @@ jobs:
     
         steps:
           - name: Checkout code
+            uses: actions/checkout@v2
+
+          - name: Register User
             id: register
-            uses: fjogeleit/http-request-action@v1
-            with:
-              url: 'http://localhost:3000/api/v1/register'
-              method: 'POST'
-              data: |
-                {
-                 "username": "${{ github.event.inputs.username }}",
-                 "email": "${{ github.event.inputs.email }}",
-                 "password": "${{ github.event.inputs.password }}"
-                }
-              customHeaders: '{"Content-Type": "application/json"}'
-            continue-on-error: true
+            run: |
+                response=$(curl -s -w "%{http_code}" -o response.txt -X POST http://localhost:3000/api/v1/register \
+                    -H "Content-Type: application/json" \
+                    -d '{
+                    "username": "${{ github.event.inputs.username }}",
+                    "email": "${{ github.event.inputs.email }}",
+                    "password": "${{ github.event.inputs.password }}"
+                    }')
+                http_code=$(tail -n1 <<< "$response")
+                if [ "$http_code" -ne 200 ]; then
+                    echo "Error en el registro de usuario"
+                    cat response.txt
+                    exit 1
+                fi
+                echo "Usuario registrado exitosamente"
+                cat response.txt
           
           - name: Verificar registro
             if: steps.register.outcome != 'success'
