@@ -27,7 +27,7 @@ jobs:
           - name: Register User
             id: register
             run: |
-                response=$(curl -s -w "%{http_code}" -o response.txt -X POST http://localhost:3000/api/v1/register \
+                response=$(curl -s -w "%{http_code}" -o response.txt -X POST  https://5965-38-25-25-217.ngrok-free.app/api/v1/register \
                     -H "Content-Type: application/json" \
                     -d '{
                     "username": "${{ github.event.inputs.username }}",
