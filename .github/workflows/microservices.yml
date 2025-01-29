@@ -23,38 +23,27 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
+        
       - name: Register User
         id: register
         run: |
-          response=$(curl -s -w "%{http_code}" -o response.txt -X POST https://5965-38-25-25-217.ngrok-free.app/api/v1/users/register \
+          response=$(curl -s -o response_body.txt -w "%{http_code}" -X POST https://5965-38-25-25-217.ngrok-free.app/api/v1/users/register \
             -H "Content-Type: application/json" \
             -d '{
               "username": "${{ github.event.inputs.username }}",
               "email": "${{ github.event.inputs.email }}",
               "password": "${{ github.event.inputs.password }}"
             }')
-          echo "response: $response"
-          http_code=$(tail -n1 <<< "$response")
-          echo "http_code: $http_code"
-          if [ "$http_code" -ne 201 ]; then
+          echo "HTTP_CODE=$response" >> $GITHUB_ENV
+          echo "RESPONSE_BODY=$(cat response_body.txt)" >> $GITHUB_ENV
+
+      - name: Verificar registro
+        run: |
+          if [ "${{ env.HTTP_CODE }}" -ne 201 ]; then
             echo "Error en el registro de usuario"
-            cat response.txt
+            echo "${{ env.RESPONSE_BODY }}"
             exit 1
           fi
           echo "Usuario registrado exitosamente"
-          cat response.txt
-
-      - name: Verificar registro
-        if: steps.register.outcome != 'success'
-        run: |
-          echo "Error en el registro de usuario"
-          echo "response: ${{ steps.register.outputs.response }}"
-          exit 1
-
-      - name: Registro exitoso
-        if: steps.register.outcome == 'success'
-        run: |
-          echo "Usuario registrado exitosamente"
-          echo "response: ${{ steps.register.outputs.response }}"
+          echo "${{ env.RESPONSE_BODY }}"
         
