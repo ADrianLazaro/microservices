@@ -35,6 +35,7 @@ jobs:
               "password": "${{ github.event.inputs.password }}"
             }')
           http_code=$(tail -n1 <<< "$response")
+          echo "http_code: $http_code"
           if [ "$http_code" -ne 200 ]; then
             echo "Error en el registro de usuario"
             cat response.txt
