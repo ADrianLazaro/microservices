@@ -34,9 +34,10 @@ jobs:
               "email": "${{ github.event.inputs.email }}",
               "password": "${{ github.event.inputs.password }}"
             }')
+          echo "response: $response"
           http_code=$(tail -n1 <<< "$response")
           echo "http_code: $http_code"
-          if [ "$http_code" -ne 200 ]; then
+          if [ "$http_code" -ne 201 ]; then
             echo "Error en el registro de usuario"
             cat response.txt
             exit 1
