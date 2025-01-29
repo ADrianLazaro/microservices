@@ -39,6 +39,7 @@ jobs:
           echo "RESPONSE_BODY: $(cat response_body.txt)"
 
       - name: Verificar registro
+        id: check_registration
         run: |
           if [ "${{ env.HTTP_CODE }}" -ne 201 ]; then
             echo "Error en el registro de empleado"
