@@ -1,0 +1,62 @@
+# Repositorio: employee-app
+# Archivo: .github/workflows/register-employee.yml
+
+name: Register New Employee
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'Nombre del empleado'
+        required: true
+      position:
+        description: 'Cargo'
+        required: true
+      department:
+        description: 'Departamento'
+        required: true
+
+jobs:
+  register:
+    runs-on: ubuntu-latest
+    outputs:
+      registration_success: ${{ steps.check_registration.outputs.success }}
+      
+    steps:
+      - name: Registrar empleado
+        id: register
+        run: |
+          response=$(curl -s -o response_body.txt -w "%{http_code}" -X POST https://5965-38-25-25-217.ngrok-free.app/api/v1/empleados/register \
+            -H "Content-Type: application/json" \
+            -d '{
+              "name": "${{ github.event.inputs.name }}",
+              "position": "${{ github.event.inputs.email }}",
+              "department": "${{ github.event.inputs.password }}"
+            }')
+          echo "HTTP_CODE=$response" >> $GITHUB_ENV
+          echo "HTTP_CODE: $HTTP_CODE"
+          echo "RESPONSE_BODY=$(cat response_body.txt)" >> $GITHUB_ENV
+          echo "RESPONSE_BODY: $RESPONSE_BODY"
+
+      - name: Verificar registro
+        run: |
+          if [ "${{ env.HTTP_CODE }}" -ne 201 ]; then
+            echo "Error en el registro de empleado"
+            echo "${{ env.RESPONSE_BODY }}"
+            exit 1
+          fi
+          echo "Empleado registrado exitosamente"
+          echo "${{ env.RESPONSE_BODY }}"
+          echo "::set-output name=success::true"
+
+      - name: Trigger Data Collection
+        if: steps.check_registration.outputs.success == 'true'
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: collect-employee-data
+          client-payload: '{
+            "name": "${{ github.event.inputs.name }}",
+            "position": "${{ github.event.inputs.position }}",
+            "department": "${{ github.event.inputs.department }}"
+            }'
