@@ -30,8 +30,8 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{
               "name": "${{ github.event.inputs.name }}",
-              "position": "${{ github.event.inputs.email }}",
-              "department": "${{ github.event.inputs.password }}"
+              "position": "${{ github.event.inputs.position }}",
+              "department": "${{ github.event.inputs.department }}"
             }')
           echo "HTTP_CODE=$response" >> $GITHUB_ENV
           echo "HTTP_CODE: $HTTP_CODE"
