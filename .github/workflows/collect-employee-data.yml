@@ -1,0 +1,33 @@
+# Repositorio: employee-app
+# Archivo: .github/workflows/collect-employee-data.yml
+
+name: Collect Employee Data
+
+on:
+  repository_dispatch:
+    types: [collect-employee-data]
+
+jobs:
+  collect-and-forward:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Preparar datos del empleado
+        id: prepare_data
+        run: |
+          # Agregamos fecha de registro
+          echo "estamos en el segundo workflow"
+          REGISTRATION_DATE=$(date -u +"%Y-%m-%d")
+          echo "::set-output name=reg_date::$REGISTRATION_DATE"
+
+      - name: Enviar datos a Reportes
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.REPORTS_REPO_TOKEN }}
+          repository: ADrianLazaro/employee-reports
+          event-type: update-employee-stats
+          client-payload: '{
+            "name": "${{ github.event.client_payload.name }}",
+            "position": "${{ github.event.client_payload.position }}",
+            "department": "${{ github.event.client_payload.department }}",
+            "registration_date": "${{ steps.prepare_data.outputs.reg_date }}"
+            }'

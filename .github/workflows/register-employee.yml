@@ -36,7 +36,7 @@ jobs:
           echo "HTTP_CODE=$response" >> $GITHUB_ENV
           echo "HTTP_CODE: $HTTP_CODE"
           echo "RESPONSE_BODY=$(cat response_body.txt)" >> $GITHUB_ENV
-          echo "RESPONSE_BODY: ${{ env.RESPONSE_BODY }}"
+          echo "RESPONSE_BODY: $(cat response_body.txt)"
 
       - name: Verificar registro
         run: |
